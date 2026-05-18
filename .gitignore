@@ -1,6 +1,5 @@
 /coverage/
 /dist/
-/gen/
 *.test
 *.out
 *.log

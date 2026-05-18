@@ -3,7 +3,7 @@ package workflowruntime
 import (
 	"time"
 
-	workflowruntimev1 "github.com/byte-v-forge/contracts-go/byte/v/forge/contracts/workflowruntime/v1"
+	workflowruntimev1 "github.com/byte-v-forge/workflow-runtime/gen/go/byte/v/forge/contracts/workflowruntime/v1"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 	"google.golang.org/protobuf/types/known/durationpb"

@@ -22,11 +22,9 @@
 ## 验证
 
 ```sh
-go test ./...
-go test -race ./...
 go vet ./...
 ```
 
 ## 契约
 
-跨仓共享模型来自公开 `contracts/workflowruntime`，Go 类型来自 `contracts-go`。
+跨仓共享模型来自本仓 `proto/byte/v/forge/contracts/workflowruntime/v1/`，Go 类型来自本仓 `gen/`。

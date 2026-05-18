@@ -1,7 +1,7 @@
 package workflowruntime
 
 import (
-	workflowruntimev1 "github.com/byte-v-forge/contracts-go/byte/v/forge/contracts/workflowruntime/v1"
+	workflowruntimev1 "github.com/byte-v-forge/workflow-runtime/gen/go/byte/v/forge/contracts/workflowruntime/v1"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

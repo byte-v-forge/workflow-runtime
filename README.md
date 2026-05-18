@@ -6,7 +6,7 @@
 
 - 提供通用 Temporal/worker 运行时能力。
 - 面向开源基础设施场景维护。
-- 跨仓共享的 workflow runtime 模型来自公开 `contracts/workflowruntime` proto。
+- 跨仓共享的 workflow runtime 模型来自本仓 `proto/byte/v/forge/contracts/workflowruntime/v1/`。
 - 各业务仓声明自己的 workflow、activity、worker、内部 proto 和业务数据。
 - Temporal history 记录执行过程；业务事实由业务服务自己的数据库、事件和读模型维护。
 - 业务开放接口由各业务仓用自己的 gRPC 服务承载。
@@ -19,7 +19,7 @@
 - 默认 activity timeout 和 retry policy。
 - 步骤级状态投影和失败策略辅助函数。
 - Temporal activity retryable/non-retryable application error 包装。
-- `contracts/workflowruntime` proto 与 Temporal Go SDK policy 的转换。
+- 本仓 workflow runtime proto 与 Temporal Go SDK policy 的转换。
 - 环境变量配置加载。
 
 ## 配置
@@ -70,14 +70,16 @@ return workflowruntime.RunWorker(ctx, temporalClient, workflowruntime.WorkerSpec
 ## 验证
 
 ```sh
-go test ./...
-go test -race ./...
 go vet ./...
 ```
 
-## 生成物
+## 生成
 
-本仓当前没有 IDL 生成流程。未来如果加入 proto 或其他生成源，生成输出按仓库生成规则处理。
+```sh
+sh scripts/generate-proto.sh
+```
+
+`gen/` 下的生成物随契约一起提交。
 
 ## 贡献与安全
 

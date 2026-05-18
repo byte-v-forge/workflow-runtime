@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+package byte.v.forge.contracts.workflowruntime.v1;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "ByteVForge.Contracts.WorkflowRuntime.V1";
+option go_package = "github.com/byte-v-forge/workflow-runtime/gen/go/byte/v/forge/contracts/workflowruntime/v1;workflowruntimev1";
+option java_multiple_files = true;
+option java_outer_classname = "WorkflowRuntimeProto";
+option java_package = "com.bytevforge.contracts.workflowruntime.v1";
+option php_namespace = "ByteVForge\\Contracts\\WorkflowRuntime\\V1";
+
+service WorkflowRuntimeControlService {
+  rpc GetWorkflowStatus(GetWorkflowStatusRequest) returns (GetWorkflowStatusResponse);
+  rpc RetryWorkflowStep(RetryWorkflowStepRequest) returns (RetryWorkflowStepResponse);
+  rpc CancelWorkflow(CancelWorkflowRequest) returns (CancelWorkflowResponse);
+}
+
+enum WorkflowExecutionStatus {
+  WORKFLOW_EXECUTION_STATUS_UNSPECIFIED = 0;
+  WORKFLOW_EXECUTION_STATUS_RUNNING = 1;
+  WORKFLOW_EXECUTION_STATUS_COMPLETED = 2;
+  WORKFLOW_EXECUTION_STATUS_FAILED = 3;
+  WORKFLOW_EXECUTION_STATUS_CANCELED = 4;
+  WORKFLOW_EXECUTION_STATUS_TERMINATED = 5;
+  WORKFLOW_EXECUTION_STATUS_TIMED_OUT = 6;
+  WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW = 7;
+}
+
+enum WorkflowStepStatus {
+  WORKFLOW_STEP_STATUS_UNSPECIFIED = 0;
+  WORKFLOW_STEP_STATUS_PENDING = 1;
+  WORKFLOW_STEP_STATUS_RUNNING = 2;
+  WORKFLOW_STEP_STATUS_SUCCEEDED = 3;
+  WORKFLOW_STEP_STATUS_FAILED = 4;
+  WORKFLOW_STEP_STATUS_WAITING_RETRY = 5;
+  WORKFLOW_STEP_STATUS_SKIPPED = 6;
+  WORKFLOW_STEP_STATUS_CANCELED = 7;
+}
+
+enum WorkflowStepFailureStrategy {
+  WORKFLOW_STEP_FAILURE_STRATEGY_UNSPECIFIED = 0;
+  WORKFLOW_STEP_FAILURE_STRATEGY_FAIL_WORKFLOW = 1;
+  WORKFLOW_STEP_FAILURE_STRATEGY_CONTINUE_WORKFLOW = 2;
+  WORKFLOW_STEP_FAILURE_STRATEGY_WAIT_RETRY_SIGNAL = 3;
+}
+
+message TaskQueueRef {
+  string namespace = 1;
+  string name = 2;
+  string owning_service = 3;
+}
+
+message WorkflowExecutionRef {
+  string namespace = 1;
+  string task_queue = 2;
+  string workflow_id = 3;
+  string run_id = 4;
+  string workflow_type = 5;
+  string owning_service = 6;
+}
+
+message WorkerRef {
+  string worker_id = 1;
+  string service_name = 2;
+  TaskQueueRef task_queue = 3;
+  string build_id = 4;
+}
+
+message RetryPolicy {
+  google.protobuf.Duration initial_interval = 1;
+  double backoff_coefficient = 2;
+  google.protobuf.Duration maximum_interval = 3;
+  int32 maximum_attempts = 4;
+  repeated string non_retryable_error_types = 5;
+}
+
+message ActivityPolicy {
+  google.protobuf.Duration schedule_to_close_timeout = 1;
+  google.protobuf.Duration start_to_close_timeout = 2;
+  google.protobuf.Duration schedule_to_start_timeout = 3;
+  google.protobuf.Duration heartbeat_timeout = 4;
+  RetryPolicy retry_policy = 5;
+}
+
+message WorkflowRuntimeError {
+  string code = 1;
+  string message = 2;
+  bool retryable = 3;
+}
+
+message WorkflowStepRef {
+  string step_id = 1;
+  string display_name = 2;
+  string activity_type = 3;
+  int32 sequence = 4;
+}
+
+message WorkflowStepAttempt {
+  int32 attempt = 1;
+  WorkflowStepStatus status = 2;
+  WorkflowRuntimeError error = 3;
+  google.protobuf.Timestamp started_at = 20;
+  google.protobuf.Timestamp closed_at = 21;
+}
+
+message WorkflowStepProjection {
+  WorkflowStepRef step = 1;
+  WorkflowStepStatus status = 2;
+  WorkflowStepFailureStrategy failure_strategy = 3;
+  int32 current_attempt = 4;
+  int32 maximum_attempts = 5;
+  WorkflowRuntimeError last_error = 6;
+  ActivityPolicy activity_policy = 7;
+  repeated WorkflowStepAttempt attempts = 8;
+  google.protobuf.Timestamp started_at = 20;
+  google.protobuf.Timestamp closed_at = 21;
+  google.protobuf.Timestamp updated_at = 22;
+  map<string, string> labels = 30;
+}
+
+message WorkflowStepRetrySignal {
+  string request_id = 1;
+  string step_id = 2;
+  string reason = 3;
+  map<string, string> labels = 20;
+}
+
+message WorkflowStatusProjection {
+  WorkflowExecutionRef execution = 1;
+  WorkflowExecutionStatus status = 2;
+  WorkflowRuntimeError last_error = 3;
+  repeated WorkflowStepProjection steps = 4;
+  google.protobuf.Timestamp started_at = 20;
+  google.protobuf.Timestamp closed_at = 21;
+  google.protobuf.Timestamp updated_at = 22;
+  map<string, string> labels = 30;
+}
+
+message GetWorkflowStatusRequest {
+  string workflow_id = 1;
+  string run_id = 2;
+}
+
+message GetWorkflowStatusResponse {
+  WorkflowStatusProjection status = 1;
+  WorkflowRuntimeError error = 2;
+}
+
+message RetryWorkflowStepRequest {
+  string workflow_id = 1;
+  string run_id = 2;
+  WorkflowStepRetrySignal signal = 3;
+}
+
+message RetryWorkflowStepResponse {
+  WorkflowStatusProjection status = 1;
+  WorkflowRuntimeError error = 2;
+}
+
+message CancelWorkflowRequest {
+  string workflow_id = 1;
+  string run_id = 2;
+  string request_id = 3;
+  string reason = 4;
+  map<string, string> labels = 20;
+}
+
+message CancelWorkflowResponse {
+  WorkflowStatusProjection status = 1;
+  WorkflowRuntimeError error = 2;
+}
